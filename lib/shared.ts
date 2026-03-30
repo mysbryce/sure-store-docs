@@ -6,7 +6,7 @@ export const mainSiteUrl = 'https://store.sure-developer.com';
 export const discordUrl = 'https://discord.gg/fjeCEkWthB';
 
 export const gitConfig = {
-  user: 'sure-store',
+  user: 'mysbryce',
   repo: 'sure-store-docs',
   branch: 'main',
 };
