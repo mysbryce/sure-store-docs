@@ -1,0 +1,168 @@
+---
+title: ExtendedPlayer
+description: Server-side player object reference for sure-es_extended, including properties, methods, and sync side effects.
+---
+
+# ExtendedPlayer
+
+`ExtendedPlayer` is the primary server-side player object.
+
+Defined in `server/classes/player/init.lua`.
+
+## Constructor
+
+Signature observed from implementation:
+
+```lua
+ExtendedPlayer:constructor(playerId, identifier, group, accounts, inventory, job, loadout, name, coords, metadata)
+```
+
+Constructor behavior:
+
+- stores source and player identity
+- stores group, metadata, and runtime variables
+- sets `admin` from `Core.IsPlayerAdmin`
+- mirrors selected values into the player state bag
+- normalizes inventory, accounts, and loadout into keyed tables
+- binds methods so they can be safely proxied by static wrappers
+
+## Core properties
+
+Observed properties include:
+
+- `accounts`
+- `inventory`
+- `loadout`
+- `job`
+- `coords`
+- `name`
+- `playerId`
+- `source`
+- `identifier`
+- `license`
+- `variables`
+- `metadata`
+- `admin`
+- `group`
+
+## Accounts methods
+
+- `getAccounts(minimal?)`
+- `getAccount(account)`
+- `setAccountMoney(name, money)`
+- `addAccountMoney(name, money)`
+- `removeAccountMoney(name, money)`
+- `getMoney()`
+- `setMoney(money)`
+- `addMoney(money)`
+- `removeMoney(money)`
+
+Behavior notes:
+
+- minimal account shape is `{ [accountName] = money }`
+- account changes emit client sync event `esx:setAccountMoney`
+- account changes also emit local server events for add, remove, and set
+
+## Inventory methods
+
+- `getInventory(minimal?)`
+- `getInventoryItem(name)`
+- `addInventoryItem(name, count)`
+- `removeInventoryItem(name, count)`
+- `setInventoryItem(name, count)`
+- `canCarryItem(name, count)`
+- `hasItem(name)`
+
+Behavior notes:
+
+- minimal inventory shape contains only positive-count items
+- add and remove update the server object and emit corresponding client events
+- `canCarryItem` respects item limit or `-1` unlimited
+
+## Job methods
+
+- `getJob()`
+- `setJob(newJob, grade)`
+
+Behavior notes:
+
+- invalid jobs are ignored with a warning
+- `setJob` updates player state bag `job`
+- emits server `esx:setJob`
+- emits client `esx:setJob`
+
+## Loadout methods
+
+- `getLoadout(minimal?)`
+- `addWeapon(name, ammo)`
+- `addWeaponComponent(name, component)`
+- `addWeaponAmmo(name, count)`
+- `updateWeaponAmmo(name, count)`
+- `setWeaponTint(name, tintIndex)`
+- `getWeaponTint(name)`
+- `removeWeapon(name)`
+- `removeWeaponComponent(name, component)`
+- `removeWeaponAmmo(name, count)`
+- `hasWeaponComponent(name, component)`
+- `hasWeapon(name)`
+- `getWeapon(name)`
+
+Behavior notes:
+
+- minimal loadout is a keyed persistence map
+- throwable weapons are removed when ammo is updated to zero or below
+- tint updates only apply when the weapon config supports the tint index
+- component add and remove also update the player's actual ped weapon state
+
+## Metadata methods
+
+- `getMeta(index?, subIndex?)`
+- `setMeta(index, value, subValue?)`
+- `clearMeta(index, subValues?)`
+
+Behavior notes:
+
+- metadata is mirrored into player state bag `metadata`
+- metadata updates trigger client `esx:updatePlayerData`
+- nested metadata tables are supported
+
+## Variable and identity methods
+
+- `isAdmin()`
+- `getIdentifier()`
+- `setGroup(newGroup)`
+- `getGroup()`
+- `getName()`
+- `setName(newName)`
+- `getSource()`
+- `getPlayerId()`
+- `set(key, value)`
+- `get(key)`
+
+Behavior notes:
+
+- `setGroup` changes ACE principals and updates player state bag `group`
+- `set(key, value)` stores custom runtime variables and also writes that key into the state bag
+
+## Utility methods
+
+- `triggerEvent(eventName, ...)`
+- `setCoords(coords)`
+- `getCoords(getVector?, withHeading?)`
+- `kick(reason)`
+- `executeCommand(command)`
+
+Behavior notes:
+
+- `triggerEvent` is a client event wrapper for the current player source
+- `getCoords` returns table or vector values depending on arguments
+- `executeCommand` delegates through client event `esx:executeCommand`
+
+## Public contract note
+
+When an external resource needs player access:
+
+- internal server code should prefer the real `ExtendedPlayer`
+- external compatibility code should prefer `ESX.Player()` or filtered player lookups where possible
+
+This fork intentionally provides both object access and lower-surface static proxy access.

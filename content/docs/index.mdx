@@ -1,20 +1,27 @@
 ---
-title: Getting Started
-description: Join our Discord for support and updates while the full documentation library is still being prepared.
+title: Documentation Categories
+description: Browse the available documentation groups inside the Sure documentation hub.
 ---
 
-import { discordUrl } from '@/lib/shared';
+# Documentation Categories
 
-Full documentation is coming later.
+This page is the top-level index for Sure documentation. Each category below groups docs for a specific resource or product.
 
-For now, the best place to get started with Sure is our Discord community.
+<Callout>
+  The structure here is category-first on purpose. As more Sure resources get their own documentation, they can be added beside `es_extended` without mixing unrelated references together.
+</Callout>
+
+## Available categories
 
 <Cards>
-  <Card title="Join Discord" href={discordUrl} />
+  <Card
+    title="es_extended"
+    href="./es_extended"
+  >
+    Full source-based reference for the Sure fork of `es_extended`, including lifecycle, APIs, persistence, and runtime notes.
+  </Card>
 </Cards>
 
-## What to do right now
+## About this structure
 
-Join Discord to ask questions, get support, and follow updates.
-
-We will expand this documentation with proper guides and references in the future.
+Each category should grow as a self-contained documentation space. That keeps framework docs, store docs, standalone resources, and internal tools easy to navigate as the library expands.

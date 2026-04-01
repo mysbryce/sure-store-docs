@@ -1,0 +1,17 @@
+{
+  "title": "es_extended",
+  "pages": [
+    "index",
+    "getting-started",
+    "architecture",
+    "configuration",
+    "database",
+    "player-lifecycle",
+    "server-api",
+    "client-api",
+    "events-and-callbacks",
+    "extended-player",
+    "nui",
+    "reference"
+  ]
+}

@@ -1,0 +1,257 @@
+---
+title: Server API
+description: Server-side exports, helpers, callbacks, commands, and runtime services exposed by sure-es_extended.
+---
+
+# Server API
+
+This page covers the main public and semi-public server-side surfaces exposed by the current fork.
+
+<Callout>
+  Think of the server API in four groups: exports, player access helpers, service registries, and operational helpers. That grouping is usually more useful than reading the file tree top to bottom.
+</Callout>
+
+## Exports
+
+### `getSharedObject`
+
+- File: `shared/main.lua`
+- Purpose: return the shared `ESX` object
+
+Typical usage:
+
+```lua
+local ESX = exports['es_extended']:getSharedObject()
+```
+
+### `runStaticPlayerMethod`
+
+- File: `server/init.lua`
+- Purpose: bridge static compatibility wrappers to live player methods and properties
+- Main consumer: `imports.lua`
+
+## Player lookup helpers
+
+<Accordions type="single" collapsible>
+  <Accordion title="When to use lookup helpers">
+    Use lookup helpers when you need a live player object or a filtered set of loaded players. They are the safest entry point for framework-aware server resources.
+  </Accordion>
+  <Accordion title="When to use compatibility wrappers">
+    Use `ESX.Player()` and `ESX.ExtendedPlayers()` when you want a narrower surface that behaves more like older ESX integrations and avoids depending on the full `ExtendedPlayer` object directly.
+  </Accordion>
+</Accordions>
+
+### `ESX.GetPlayerFromId(playerId)`
+
+Returns the loaded server player object for a specific source if present.
+
+### `ESX.GetPlayerFromIdentifier(identifier)`
+
+Returns the loaded player object matching a persisted identifier.
+
+### `ESX.GetPlayerFromIdentifiers(identifiers)`
+
+Looks up a player using an identifier collection.
+
+### `ESX.GetPlayerIdFromIdentifier(identifier)`
+
+Returns the active player source for a known identifier when that player is loaded.
+
+### `ESX.IsPlayerLoaded(playerId)`
+
+Checks whether the source currently has a loaded framework player object.
+
+### `ESX.GetExtendedPlayers(key?, value?)`
+
+Returns the current loaded player collection, optionally filtered.
+
+### `ESX.GetNumPlayers(key?, value?)`
+
+Returns the number of currently loaded players, with optional filtering behavior.
+
+### `ESX.GetIdsByJob(jobName, grade?)`
+
+Returns active player IDs that match the requested job criteria.
+
+### `ESX.GetIdentifier(playerId)`
+
+Resolves the configured player identifier strategy for a source.
+
+## Compatibility helpers
+
+### `ESX.Player(src)`
+
+Defined in `imports.lua`.
+
+Returns a static compatibility proxy that delegates to the live player object.
+
+### `ESX.ExtendedPlayers(key?, val?)`
+
+Defined in `imports.lua`.
+
+Returns compatibility proxies for multiple players.
+
+## Callback service
+
+### `ESX.RegisterServerCallback(name, cb)`
+
+Wraps `lib.callback.register` and exposes the legacy ESX registration style.
+
+Built-in callback names observed in the fork:
+
+- `esx:getPlayerData`
+- `esx:isUserAdmin`
+- `esx:getGameBuild`
+- `esx:getPlayerNames`
+- `esx:spawnVehicle`
+
+## Command service
+
+### `ESX.RegisterCommand`
+
+Used to register framework commands with group or permission rules and handler logic.
+
+Observed built-in commands include:
+
+- `setcoords`
+- `tp`
+- `setjob`
+- `car`
+- `cardel`
+- `dv`
+- `fix`
+- `repair`
+- `setaccountmoney`
+- `giveaccountmoney`
+- `removeaccountmoney`
+- `giveitem`
+- `giveweapon`
+- `giveammo`
+- `giveweaponcomponent`
+- `clear`
+- `cls`
+- `clearall`
+- `clsall`
+- `refreshjobs`
+- `refreshitems`
+- `clearinventory`
+- `clearloadout`
+- `setgroup`
+- `save`
+- `saveall`
+- `group`
+- `job`
+- `info`
+- `coords`
+- `tpm`
+- `goto`
+- `bring`
+- `kill`
+- `freeze`
+- `unfreeze`
+- `noclip`
+- `players`
+- `setdim`
+- `setbucket`
+
+## Item services
+
+### `ESX.RegisterUsableItem(name, cb)`
+
+Registers a usable item handler.
+
+### `ESX.UseItem(source, item, ...)`
+
+Executes a registered usable item callback.
+
+### `ESX.GetItemLabel(name)`
+
+Returns the current label for an item from the runtime item cache.
+
+### `ESX.GetItems()`
+
+Returns the loaded item metadata cache.
+
+### `ESX.GetUsableItems()`
+
+Returns the current usable item registrations.
+
+### `ESX.RefreshItems()`
+
+Reloads item definitions from persistence into runtime memory.
+
+## Job services
+
+### `ESX.RefreshJobs()`
+
+Reloads jobs and grades from persistence into runtime memory.
+
+### `ESX.GetJobs()`
+
+Returns the loaded jobs structure.
+
+### `ESX.DoesJobExist(job, grade)`
+
+Checks whether a job and grade combination exists.
+
+### `ESX.CreateJob(name, label, grades)`
+
+Creates a job definition through the framework service layer.
+
+## Persistence services
+
+### `Core.SavePlayer(xPlayer, cb?)`
+
+Saves one loaded player.
+
+### `Core.SavePlayers(cb?)`
+
+Saves all loaded players.
+
+These functions are central to disconnect handling and manual save commands.
+
+## Utility services
+
+### `ESX.Trace(...)`
+
+Framework debug or trace output helper.
+
+### `Core.IsPlayerAdmin(playerId)`
+
+Internal admin evaluation helper used by the player constructor and permission-sensitive flows.
+
+## Vehicle helper
+
+### `ESX.GetVehicleType(model, source?, cb?)`
+
+Used by the framework's vehicle-related callback and utility flow.
+
+## OneSync helpers
+
+The fork exposes a OneSync utility namespace:
+
+- `ESX.OneSync.GetPlayersInArea`
+- `ESX.OneSync.GetClosestPlayer`
+- `ESX.OneSync.SpawnVehicle`
+- `ESX.OneSync.SpawnObject`
+- `ESX.OneSync.SpawnPed`
+- `ESX.OneSync.SpawnPedInVehicle`
+- `ESX.OneSync.GetPedsInArea`
+- `ESX.OneSync.GetObjectsInArea`
+- `ESX.OneSync.GetVehiclesInArea`
+- `ESX.OneSync.GetClosestPed`
+- `ESX.OneSync.GetClosestObject`
+- `ESX.OneSync.GetClosestVehicle`
+
+These helpers form the entity and proximity utility surface for server-side gameplay resources.
+
+## Practical usage note
+
+<Tabs items={['Internal framework code', 'External integrations']}>
+  <Tab>
+    <p>For direct framework internals, prefer the live <code>ExtendedPlayer</code> object so you can work with the full method surface and state updates.</p>
+  </Tab>
+  <Tab>
+    <p>For external resource compatibility and narrower access, prefer the static helpers from <code>imports.lua</code>.</p>
+  </Tab>
+</Tabs>

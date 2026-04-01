@@ -1,0 +1,207 @@
+---
+title: Client API
+description: Client-side ESX helpers, UI services, gameplay helpers, spawn functions, and streaming utilities in sure-es_extended.
+---
+
+# Client API
+
+This page documents the major client-side helpers exposed on `ESX` in the current fork.
+
+<Callout>
+  The client API is more than a sync target. In this fork it acts as a practical toolkit for UI flows, spawn handling, world interaction, vehicles, and asset streaming.
+</Callout>
+
+## Player data helpers
+
+### `ESX.IsPlayerLoaded()`
+
+Returns whether the local framework player state has completed loading.
+
+### `ESX.GetPlayerData()`
+
+Returns the current client-side player data snapshot.
+
+### `ESX.WaitForPlayerLoaded()`
+
+Waits for player load state before continuing.
+
+### `ESX.SetPlayerData(key, value)`
+
+Updates local player data and is also used internally by sync flows.
+
+### `ESX.GetAccount(name)`
+
+Returns a specific account from the local player data payload.
+
+### `ESX.GetItemLabel(name)`
+
+Returns a label for an item using the client's available item metadata.
+
+### `ESX.SearchInventory(name, metadata?)`
+
+Search helper for local inventory content.
+
+## Callback bridge
+
+### `ESX.TriggerServerCallback(name, cb, ...)`
+
+Client-to-server callback bridge for framework and gameplay resources.
+
+Observed built-in callback usage includes:
+
+- `esx:getPlayerData`
+- `esx:isUserAdmin`
+- `esx:getGameBuild`
+- `esx:getPlayerNames`
+- `esx:spawnVehicle`
+- `esx:getVehicleType`
+
+## Spawn helpers
+
+### `ESX.DisableSpawnManager()`
+
+Turns off the default spawn manager flow so ESX-controlled spawning can take over.
+
+### `ESX.SpawnPlayer(spawn?, cb?)`
+
+Framework-controlled spawn helper for the local player.
+
+### `Core.FreezePlayer(state)`
+
+Used during controlled spawn and transition flows.
+
+## Notifications and UI helpers
+
+### `ESX.ShowNotification(message, type?, length?, title?, position?)`
+
+Sends a standard framework notification through the NUI notification layer.
+
+### `ESX.ShowAdvancedNotification(sender, subject, msg, textureDict?, iconType?, flash?, saveToBrief?, hudColorIndex?)`
+
+Shows an advanced notification style.
+
+### `ESX.ShowHelpNotification(msg, thisFrame?, beep?, duration?)`
+
+Displays help text using the framework helper.
+
+### `ESX.ShowFloatingHelpNotification(msg, coords)`
+
+Displays floating help text in world space.
+
+### `ESX.DrawMissionText(message, duration)`
+
+Draws mission-style text.
+
+### `ESX.HashString(str)`
+
+Hashes a string for UI or helper workflows.
+
+### `ESX.RegisterInput(...)`
+
+Registers framework input helpers used by client-side UI patterns.
+
+## Menu API
+
+The client exposes an `ESX.UI.Menu` namespace:
+
+- `ESX.UI.Menu.RegisterType`
+- `ESX.UI.Menu.Open`
+- `ESX.UI.Menu.Close`
+- `ESX.UI.Menu.CloseAll`
+- `ESX.UI.Menu.GetOpened`
+- `ESX.UI.Menu.GetOpenedMenus`
+- `ESX.UI.Menu.IsOpen`
+
+This remains part of the client UI compatibility surface even though the current NUI is notification-focused.
+
+<Tabs items={['Framework UI', 'Gameplay helpers']}>
+  <Tab>
+    <p>The UI side covers notifications, help prompts, mission text, menu registration, and framework input patterns.</p>
+  </Tab>
+  <Tab>
+    <p>The gameplay side covers object helpers, peds, players, teleporting, vehicle helpers, scaleform utilities, and asset streaming.</p>
+  </Tab>
+</Tabs>
+
+## `ESX.Game` helpers
+
+### World and object helpers
+
+- `ESX.Game.SpawnObject`
+- `ESX.Game.SpawnLocalObject`
+- `ESX.Game.DeleteObject`
+- `ESX.Game.GetObjects`
+- `ESX.Game.GetClosestObject`
+- `ESX.Game.GetClosestEntity`
+
+### Player and ped helpers
+
+- `ESX.Game.GetPeds`
+- `ESX.Game.GetPlayers`
+- `ESX.Game.GetPedMugshot`
+- `ESX.Game.GetClosestPed`
+- `ESX.Game.GetClosestPlayer`
+- `ESX.Game.GetPlayersInArea`
+
+### Raycast and movement helpers
+
+- `ESX.Game.GetShapeTestResultSync`
+- `ESX.Game.RaycastScreen`
+- `ESX.Game.Teleport`
+- `ESX.Game.Utils.DrawText3D`
+
+### Vehicle helpers
+
+- `ESX.Game.DeleteVehicle`
+- `ESX.Game.SpawnVehicle`
+- `ESX.Game.SpawnLocalVehicle`
+- `ESX.Game.IsVehicleEmpty`
+- `ESX.Game.GetVehicles`
+- `ESX.Game.GetClosestVehicle`
+- `ESX.Game.GetVehiclesInArea`
+- `ESX.Game.IsSpawnPointClear`
+- `ESX.Game.GetVehicleInDirection`
+- `ESX.Game.GetVehicleProperties`
+- `ESX.Game.SetVehicleProperties`
+
+### Vehicle type helper
+
+- `ESX.GetVehicleTypeClient`
+
+Used by the client-side vehicle classification flow and callback interactions.
+
+## Scaleform helpers
+
+The client exposes a scaleform namespace:
+
+- `ESX.Scaleform.ShowFreemodeMessage`
+- `ESX.Scaleform.ShowBreakingNews`
+- `ESX.Scaleform.ShowPopupWarning`
+- `ESX.Scaleform.ShowTrafficMovie`
+- `ESX.Scaleform.Utils.RequestScaleformMovie`
+- `ESX.Scaleform.Utils.RunMethod`
+
+## Streaming helpers
+
+The client exposes a streaming namespace:
+
+- `ESX.Streaming.RequestModel`
+- `ESX.Streaming.RequestStreamedTextureDict`
+- `ESX.Streaming.RequestNamedPtfxAsset`
+- `ESX.Streaming.RequestAnimSet`
+- `ESX.Streaming.RequestAnimDict`
+- `ESX.Streaming.RequestWeaponAsset`
+
+These helpers centralize common asset request patterns used by client resources.
+
+## Internal event relationship
+
+Much of the client API is driven by:
+
+- `esx:playerLoaded`
+- `esx:onPlayerSpawn`
+- `esx:onPlayerDeath`
+- `esx:setPlayerData`
+- server callback responses
+
+See [Events and Callbacks](./events-and-callbacks) for the exact names and payload notes.

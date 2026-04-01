@@ -1,0 +1,174 @@
+---
+title: Player Lifecycle
+description: End-to-end flow for join, create, load, sync, spawn, death, save, and disconnect in sure-es_extended.
+---
+
+# Player Lifecycle
+
+This page summarizes the major lifecycle stages observed in the current implementation.
+
+## 1. Player connects
+
+When a player begins joining the server, the framework resolves the identifier configured by `settings/public.lua` and prepares to determine whether the player already has persisted data.
+
+Important helpers involved across the lifecycle include:
+
+- `ESX.GetIdentifier`
+- `ESX.IsPlayerLoaded`
+- `ESX.GetPlayerFromId`
+
+## 2. Join event enters framework flow
+
+The server accepts the player through `esx:onPlayerJoined`.
+
+From there, the framework begins either:
+
+- loading an existing player record, or
+- building first-time starter state for a new player
+
+## 3. New player creation or existing player load
+
+The framework reconstructs the player state required by the `ExtendedPlayer` constructor:
+
+- identifier
+- group
+- accounts
+- inventory
+- job
+- loadout
+- display name
+- coords
+- metadata
+
+For new players, starter defaults are taken from configuration. For existing players, the values come from persistence.
+
+## 4. `ExtendedPlayer` is created
+
+The server constructs `ExtendedPlayer` and stores it in the loaded-player registry.
+
+Constructor side effects include:
+
+- normalizing account, inventory, and loadout structures
+- setting admin status
+- creating runtime variable storage
+- mirroring key fields into the player state bag
+
+## 5. Client-safe payload is prepared
+
+Before the server notifies the client, it builds a sanitized payload for `esx:playerLoaded`.
+
+Observed client payload fields include:
+
+- `accounts`
+- `inventoryClient`
+- `loadout`
+- `coords`
+- `skin`
+- `metadata`
+
+Several server-only identity or framework-internal fields are intentionally removed before sync.
+
+## 6. Loaded events fire
+
+The framework emits lifecycle events on both server and client.
+
+### Server-side
+
+- `esx:playerLoaded`
+
+Observed arguments:
+
+- `source`
+- static or proxy player wrapper
+- `isNew`
+
+### Client-side
+
+- `esx:playerLoaded`
+
+Observed arguments:
+
+- client-safe player payload
+- `isNew`
+
+## 7. Spawn flow runs
+
+After the client has player data, spawn-related logic takes over.
+
+Relevant pieces include:
+
+- `ESX.SpawnPlayer`
+- `ESX.DisableSpawnManager`
+- local client event `esx:onPlayerSpawn`
+- base game event `playerSpawned`
+
+The framework also coordinates freezing and unfreezing behavior during controlled spawn transitions.
+
+## 8. Ongoing state synchronization
+
+During play, player state is kept in sync through direct client events and state bag writes.
+
+Examples:
+
+- account changes emit `esx:setAccountMoney`
+- inventory changes emit `esx:addInventoryItem`, `esx:removeInventoryItem`, or `esx:setInventory`
+- job changes emit `esx:setJob`
+- metadata changes emit `esx:updatePlayerData`
+
+The client also watches state bag keys such as:
+
+- `identifier`
+- `dateofbirth`
+- `name`
+- `firstName`
+- `lastName`
+- `height`
+- `job`
+- `variables`
+- `metadata`
+- `group`
+
+## 9. Death-related flow
+
+The client and server both participate in death state handling through `esx:onPlayerDeath`.
+
+Observed payload fields include:
+
+- `victimCoords`
+- `killedByPlayer`
+- `deathCause`
+- optional `killerCoords`
+- optional `distance`
+- optional `killerServerId`
+- optional `killerClientId`
+
+This is event-driven state reporting rather than a standalone death management subsystem inside this resource.
+
+## 10. Save operations
+
+Player state is saved during explicit saves, bulk saves, and disconnect flow.
+
+Relevant pieces:
+
+- `Core.SavePlayer`
+- `Core.SavePlayers`
+- local event `esx:playerSaved`
+
+## 11. Player disconnects
+
+When the player leaves, the framework saves state and emits:
+
+- `esx:playerDropped`
+
+After that, the player is removed from the loaded-player registry.
+
+## Lifecycle summary
+
+The implementation follows a consistent pattern:
+
+1. resolve identifier
+2. load or create player state
+3. construct `ExtendedPlayer`
+4. sync a sanitized payload to the client
+5. maintain state through events and state bags
+6. persist on save and disconnect

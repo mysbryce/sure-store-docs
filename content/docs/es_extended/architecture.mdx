@@ -1,0 +1,182 @@
+---
+title: Architecture
+description: Internal structure of the sure-es_extended fork, including ESX globals, compatibility helpers, and player model design.
+---
+
+# Architecture
+
+This page describes how the current `sure-es_extended` fork is structured and how its main runtime objects relate to each other.
+
+<Callout>
+  A useful way to read this resource is to think in layers: shared foundation, server runtime, client runtime, and a small NUI bridge. Most of the framework behavior becomes easier to follow once those boundaries are clear.
+</Callout>
+
+## Folder layout
+
+Observed top-level runtime structure:
+
+- `client/`: client bootstrap, modules, helpers, menus, game utilities, and spawn logic
+- `server/`: bootstrap, persistence, callbacks, commands, jobs, items, and player class implementation
+- `shared/`: common helpers, config loader, weapon helpers, math and table modules, and shared object export
+- `settings/`: runtime configuration files
+- `nui/`: React notification UI source and built assets
+- `es_extended.sql`: SQL schema and seed data
+- `imports.lua`: compatibility access layer for external resources
+
+## Core globals
+
+### `ESX`
+
+`ESX` is the shared framework object exposed to both server and client code. It is populated incrementally through the shared, server, and client bootstrap files.
+
+Observed responsibilities include:
+
+- shared config access
+- utility helpers
+- weapon helpers
+- server player lookup APIs
+- callback and command registration
+- client player data helpers
+- client UI and gameplay helpers
+
+### `Core`
+
+`Core` is the internal server-side companion object used for framework internals that are not treated as the public ESX surface.
+
+Observed responsibilities include:
+
+- active player storage
+- save helpers
+- internal item and job caches
+- admin checks
+- lifecycle support
+
+<Tabs items={['ESX', 'Core']}>
+  <Tab>
+    <p><code>ESX</code> is the public-facing framework surface. Other resources are expected to read helpers, callbacks, player utilities, and client or server services from here.</p>
+  </Tab>
+  <Tab>
+    <p><code>Core</code> is the internal companion layer. It holds framework-owned state such as loaded players, caches, admin evaluation, and save helpers that do not need to be treated as the main public API.</p>
+  </Tab>
+</Tabs>
+
+## Shared export
+
+The primary shared integration point is the `getSharedObject` export from `shared/main.lua`:
+
+```lua
+ESX = exports['es_extended']:getSharedObject()
+```
+
+This export is the compatibility surface most external resources rely on to obtain the framework object.
+
+## Player model
+
+### `ExtendedPlayer`
+
+`ExtendedPlayer` is the main server-side player class and is defined in `server/classes/player/init.lua`.
+
+The constructor receives the loaded player state and normalizes:
+
+- accounts
+- inventory
+- loadout
+- identity fields
+- metadata
+- runtime variables
+
+It also mirrors selected values into the player state bag and binds method access so compatibility wrappers can call instance behavior safely.
+
+### Active player indexing
+
+The implementation keeps loaded players in internal server structures and exposes them through helper functions such as:
+
+- `ESX.GetPlayerFromId`
+- `ESX.GetPlayerFromIdentifier`
+- `ESX.GetExtendedPlayers`
+- `ESX.IsPlayerLoaded`
+
+This means the live player registry is owned by the server runtime, not reconstructed ad hoc from the database.
+
+## Compatibility layer
+
+### `imports.lua`
+
+This fork keeps a compatibility layer in `imports.lua` so external resources can work with static wrappers instead of full `ExtendedPlayer` objects.
+
+Important helpers:
+
+- `ESX.Player(src)`
+- `ESX.ExtendedPlayers(key?, val?)`
+
+These wrappers delegate through `runStaticPlayerMethod` and map common property reads like `job`, `group`, `identifier`, `accounts`, `inventory`, `loadout`, `name`, and `coords` to underlying player getters.
+
+This is a deliberate dual-surface design:
+
+- internal framework code can use the real `ExtendedPlayer`
+- compatibility-facing code can use static proxies
+
+<Callout title="Compatibility model">
+  This fork does not force everything through one player access pattern. Internal code can stay rich and object-oriented, while older resources can keep using narrower wrapper-based access through <code>imports.lua</code>.
+</Callout>
+
+## Hybrid data model
+
+The fork maintains both server-rich and client-safe player data shapes.
+
+Examples:
+
+- full inventory structures exist on the server for persistence and rules
+- cleaned inventory and account data are transmitted to the client
+- server-only identity fields are removed before `esx:playerLoaded` is sent to the client
+
+This is especially visible in the load flow documented in [Player Lifecycle](./player-lifecycle).
+
+## Server bootstrap
+
+The server runtime composes the framework from multiple files:
+
+- common helpers
+- class definitions
+- callback service
+- command service
+- player persistence
+- jobs and items modules
+
+By the time players begin loading, the framework has already prepared caches, exports, and registration surfaces.
+
+## Client bootstrap
+
+The client runtime wires together:
+
+- player loaded state handling
+- spawn flow
+- notification and help UI helpers
+- callback bridge to the server
+- `ESX.Game` helpers
+- scaleform helpers
+- streaming helpers
+
+This fork therefore treats the client as a first-class runtime API surface rather than a thin sync target.
+
+<Accordions type="single" collapsible>
+  <Accordion title="Server-side reading strategy">
+    Start with player loading and persistence, then move outward to callbacks, commands, items, and jobs. That order matches how the server comes online.
+  </Accordion>
+  <Accordion title="Client-side reading strategy">
+    Start with `esx:playerLoaded`, then follow spawn, UI helpers, and `ESX.Game` utilities. Most client behavior branches from that initial sync point.
+  </Accordion>
+</Accordions>
+
+## NUI architecture
+
+The current NUI implementation is intentionally narrow. It is a notification-focused React app, not a full framework shell for inventory or HUD.
+
+The browser layer listens for game events such as:
+
+- `notification/setDefaults`
+- `notification/add`
+- `toggle`
+- `update`
+
+See [NUI](./nui) for details.
