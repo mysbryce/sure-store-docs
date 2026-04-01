@@ -1,0 +1,146 @@
+---
+title: Database
+description: SQL assets, schema expectations, persistence fields, and save behavior for sure-es_extended.
+---
+
+# Database
+
+This page documents the persistence model observed in the current fork.
+
+<Callout title="Observed behavior">
+  The persistence layer is documented from the current code paths and bundled SQL, not from assumed upstream ESX conventions.
+</Callout>
+
+## SQL assets
+
+The repository includes:
+
+- `es_extended.sql`
+- runtime schema logic in `server/init.lua`
+
+These two sources should be reviewed together because the runtime bootstrap and the provided SQL file are not perfectly aligned in every detail.
+
+## Core tables
+
+From the supplied SQL asset and persistence code, the important tables are:
+
+- `users`
+- `jobs`
+- `job_grades`
+- `items`
+
+The framework relies on these tables for player identity, jobs, and item metadata.
+
+## Runtime schema note
+
+Observed from implementation:
+
+- startup bootstrap checks reference `users_test`
+- player load and save logic centers on the normal user persistence flow associated with `users`
+
+Treat this as a code-backed mismatch that must be verified in your environment. Do not assume the bootstrap check reflects the only valid schema path.
+
+<Tabs items={['What matches', 'What needs verification']}>
+  <Tab>
+    <p>The implementation clearly relies on the normal player persistence flow built around user records, job data, grade data, and item metadata.</p>
+  </Tab>
+  <Tab>
+    <p>The startup reference to <code>users_test</code> should be checked in your environment before rollout. It is the kind of mismatch that can stay hidden until first boot or schema reset.</p>
+  </Tab>
+</Tabs>
+
+## Item seed and cache behavior
+
+Item definitions are loaded into a server-side cache and exposed through helpers such as:
+
+- `ESX.GetItems`
+- `ESX.GetItemLabel`
+- `ESX.RefreshItems`
+
+This means gameplay code generally reads item metadata from framework memory after initial load, not directly from SQL on every request.
+
+## Job persistence and cache behavior
+
+Jobs and grades are loaded into an in-memory structure exposed through:
+
+- `ESX.GetJobs`
+- `ESX.DoesJobExist`
+- `ESX.RefreshJobs`
+- `ESX.CreateJob`
+
+As with items, SQL acts as the source of truth, but the active runtime uses cached structures once loaded.
+
+## Player persistence fields
+
+Observed persisted player data includes the major state needed to reconstruct the server-side player object:
+
+- identifier
+- accounts
+- inventory
+- job
+- loadout
+- position or coordinates
+- metadata
+- name-related identity fields where configured in the users record
+
+The client does not receive the full raw persistence row. A cleaned player payload is built for synchronization.
+
+## Inventory persistence shape
+
+Inventory is handled as a structured table on the server and may also be serialized for persistence depending on the specific field layout in the current schema.
+
+Observed implementation behavior:
+
+- runtime methods normalize inventory into a keyed object
+- minimal views only include positive-count items
+- add and remove changes immediately mutate the server player object
+- save flow writes the resulting state back through the persistence layer
+
+## Loadout persistence shape
+
+Loadout data includes weapon names and additional attributes such as:
+
+- ammo
+- components
+- tint
+
+The runtime uses a keyed representation for efficient player method access, then persists the resulting state during save operations.
+
+## Save timing
+
+The framework saves player state:
+
+- during explicit save operations
+- during bulk save operations
+- when players disconnect
+
+Relevant services include:
+
+- `Core.SavePlayer`
+- `Core.SavePlayers`
+
+The server also emits local events such as `esx:playerSaved` to mark save completion.
+
+## Operational guidance
+
+<Steps>
+
+### Confirm the live schema
+
+Make sure the tables and field expectations used by the code match the database your server will actually boot against.
+
+### Verify the users table path
+
+Check whether your environment should use `users`, `users_test`, or a patched version of the startup bootstrap logic.
+
+### Validate cache refresh
+
+Make sure items and jobs refresh correctly at startup so the in-memory runtime has the data it expects.
+
+### Test reconnect persistence
+
+Perform a full connect, modify, save, disconnect, and reconnect cycle with real player data before production rollout.
+
+</Steps>
+
+For the runtime flow around loading and saving players, see [Player Lifecycle](./player-lifecycle).

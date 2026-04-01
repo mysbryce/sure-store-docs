@@ -1,0 +1,185 @@
+---
+title: Events and Callbacks
+description: Net events, local events, callback names, and payload observations for sure-es_extended.
+---
+
+# Events and Callbacks
+
+This page lists the important callbacks and event contracts observed in the implementation.
+
+## Server callbacks registered through `lib.callback.register`
+
+### Legacy wrapper registration
+
+`ESX.RegisterServerCallback(name, cb)` wraps `lib.callback.register`.
+
+### Built-in callback names
+
+- `esx:getPlayerData`
+- `esx:isUserAdmin`
+- `esx:getGameBuild`
+- `esx:getPlayerNames`
+- `esx:spawnVehicle`
+
+### Client callback usage
+
+The client also registers:
+
+- `esx:getVehicleType`
+
+## Client-to-server net events
+
+Observed incoming server events:
+
+- `esx:onPlayerJoined`
+- `esx:onPlayerSpawn`
+- `esx:onPlayerDeath`
+- `esx:updateWeaponAmmo`
+- `esx:giveInventoryItem`
+- `esx:removeInventoryItem`
+- `esx:useItem`
+- `esx:clientLog`
+
+## Server-to-client net events
+
+Observed outgoing client events:
+
+- `esx:playerLoaded`
+- `esx:registerSuggestions`
+- `esx:setInventory`
+- `esx:setAccountMoney`
+- `esx:addInventoryItem`
+- `esx:removeInventoryItem`
+- `esx:addLoadoutItem`
+- `esx:removeLoadoutItem`
+- `esx:addWeaponComponent`
+- `esx:removeWeaponComponent`
+- `esx:setWeaponTint`
+- `esx:setJob`
+- `esx:setGroup`
+- `esx:updatePlayerData`
+- `esx:executeCommand`
+- `esx:requestModel`
+- `esx:showNotification`
+- `esx:showAdvancedNotification`
+- `esx:showHelpNotification`
+- `esx:repairPedVehicle`
+- `esx:tpm`
+- `esx:killPlayer`
+- `esx:freezePlayer`
+- `esx:noclip`
+
+## Local events observed on the server
+
+- `esx:playerLoaded`
+- `esx:playerDropped`
+- `esx:playerSaved`
+- `esx:setJob`
+- `esx:setGroup`
+- `esx:setAccountMoney`
+- `esx:addAccountMoney`
+- `esx:removeAccountMoney`
+- `esx:onAddInventoryItem`
+- `esx:onRemoveInventoryItem`
+- `esx:jobsRefreshed`
+- `esx:playerInventoryCleared`
+- `esx:playerLoadoutCleared`
+
+## Local events observed on the client
+
+- `esx:onPlayerSpawn`
+- `esx:onPlayerDeath`
+- `esx:restoreLoadout`
+- `esx:loadingScreenOff`
+- `esx:setPlayerData`
+
+Also used:
+
+- `playerSpawned`
+- `skinchanger:modelLoaded`
+- `onResourceStop`
+
+## Event payload notes
+
+### `esx:playerLoaded` (server event)
+
+Observed arguments:
+
+- `source`
+- static or proxy player wrapper
+- `isNew`
+
+### `esx:playerLoaded` (client event)
+
+Observed arguments:
+
+- `xPlayer` payload intended for the client
+- `isNew`
+
+That payload includes cleaned client-safe data such as:
+
+- `accounts`
+- `inventoryClient`
+- `loadout`
+- `coords`
+- `skin`
+- `metadata`
+
+Several identity and server-only fields are removed before the payload is sent.
+
+### `esx:onPlayerDeath`
+
+Observed data payload contains:
+
+- `victimCoords`
+- `killedByPlayer`
+- `deathCause`
+- optional `killerCoords`
+- optional `distance`
+- optional `killerServerId`
+- optional `killerClientId`
+
+### `esx:getPlayerData`
+
+Returned callback payload includes:
+
+- `identifier`
+- `accounts`
+- `inventory`
+- `job`
+- `loadout`
+- `money`
+- `position`
+- `metadata`
+
+## State bag synchronization
+
+The client watches these state bag keys on its own player:
+
+- `identifier`
+- `dateofbirth`
+- `name`
+- `firstName`
+- `lastName`
+- `height`
+- `job`
+- `variables`
+- `metadata`
+- `group`
+
+The server writes to state bags in `ExtendedPlayer` methods and constructor.
+
+## NUI events
+
+Observed NUI-side events:
+
+- `notification/setDefaults`
+- `notification/add`
+- `toggle`
+- `update`
+
+Observed NUI callbacks requested from the browser:
+
+- `notification/ready`
+- `ready`
+- `close`

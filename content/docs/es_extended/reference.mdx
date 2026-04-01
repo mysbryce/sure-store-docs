@@ -1,0 +1,421 @@
+---
+title: Reference
+description: Exact-name reference for exports, helpers, commands, callbacks, events, config keys, and player methods in sure-es_extended.
+---
+
+# Reference
+
+This page is a compact exact-name reference for the current implementation.
+
+## Exports
+
+### `getSharedObject`
+
+- File: `shared/main.lua`
+- Purpose: return the shared `ESX` object
+- Notes: this is the primary integration export
+
+### `runStaticPlayerMethod`
+
+- File: `server/init.lua`
+- Purpose: bridge static compatibility wrappers to loaded player methods and properties
+- Notes: used by `imports.lua`
+
+## Compatibility helpers
+
+### `ESX.Player(src)`
+
+- File: `imports.lua`
+- Purpose: return a static proxy for a loaded player by source or identifier
+- Return: proxy object or `nil`
+- Notes: property keys such as `job`, `group`, `identifier`, `accounts`, `inventory`, `loadout`, `name`, and `coords` are mapped to getter methods
+
+### `ESX.ExtendedPlayers(key?, val?)`
+
+- File: `imports.lua`
+- Purpose: return static player proxies from `ESX.GetExtendedPlayers`
+- Return: array of proxies or grouped table when `val` is an array
+
+## Shared functions
+
+### General helpers from `shared/functions.lua`
+
+- `ESX.GetRandomString(length)`
+- `ESX.GetConfig(key?)`
+- `ESX.GetWeapon(weaponName)`
+- `ESX.GetWeaponFromHash(weaponHash)`
+- `ESX.GetWeaponList(byHash)`
+- `ESX.GetWeaponLabel(weaponName)`
+- `ESX.GetWeaponComponent(weaponName, weaponComponent)`
+- `ESX.DumpTable(table, nb?)`
+- `ESX.Round(value, numDecimalPlaces?)`
+- `ESX.ValidateType(value, ...)`
+- `ESX.AssertType(...)`
+- `ESX.IsFunctionReference(val)`
+- `ESX.Await(conditionFunc, errorMessage?, timeoutMs?)`
+
+### `ESX.Math` from `shared/modules/math.lua`
+
+- `ESX.Math.Round`
+- `ESX.Math.GroupDigits`
+- `ESX.Math.Trim`
+- `ESX.Math.Random`
+- `ESX.Math.GetHeadingFromCoords`
+
+### `ESX.Table` from `shared/modules/table.lua`
+
+- `ESX.Table.SizeOf`
+- `ESX.Table.Set`
+- `ESX.Table.IndexOf`
+- `ESX.Table.LastIndexOf`
+- `ESX.Table.Find`
+- `ESX.Table.FindIndex`
+- `ESX.Table.Filter`
+- `ESX.Table.Map`
+- `ESX.Table.Reverse`
+- `ESX.Table.Clone`
+- `ESX.Table.Concat`
+- `ESX.Table.Join`
+- `ESX.Table.TableContains`
+- `ESX.Table.Sort`
+- `ESX.Table.ToArray`
+- `ESX.Table.Wipe`
+
+## Server services
+
+### Player services
+
+- `Core.SavePlayer`
+- `Core.SavePlayers`
+- `ESX.GetExtendedPlayers`
+- `ESX.GetNumPlayers`
+- `ESX.GetPlayerFromId`
+- `ESX.GetPlayerFromIdentifier`
+- `ESX.GetPlayerFromIdentifiers`
+- `ESX.GetPlayerIdFromIdentifier`
+- `ESX.IsPlayerLoaded`
+- `ESX.GetIdentifier`
+- `ESX.GetIdsByJob`
+- `Core.IsPlayerAdmin`
+
+### Callback service
+
+- `ESX.RegisterServerCallback`
+
+### Command service
+
+- `ESX.RegisterCommand`
+
+### Item service
+
+- `ESX.RegisterUsableItem`
+- `ESX.UseItem`
+- `ESX.GetItemLabel`
+- `ESX.GetItems`
+- `ESX.GetUsableItems`
+- `ESX.RefreshItems`
+
+### Job service
+
+- `ESX.RefreshJobs`
+- `ESX.GetJobs`
+- `ESX.DoesJobExist`
+- `ESX.CreateJob`
+
+### Vehicle service
+
+- `ESX.GetVehicleType`
+
+### Utility service
+
+- `ESX.Trace`
+
+## OneSync service
+
+- `ESX.OneSync.GetPlayersInArea`
+- `ESX.OneSync.GetClosestPlayer`
+- `ESX.OneSync.SpawnVehicle`
+- `ESX.OneSync.SpawnObject`
+- `ESX.OneSync.SpawnPed`
+- `ESX.OneSync.SpawnPedInVehicle`
+- `ESX.OneSync.GetPedsInArea`
+- `ESX.OneSync.GetObjectsInArea`
+- `ESX.OneSync.GetVehiclesInArea`
+- `ESX.OneSync.GetClosestPed`
+- `ESX.OneSync.GetClosestObject`
+- `ESX.OneSync.GetClosestVehicle`
+
+## Client services
+
+### Player data
+
+- `ESX.IsPlayerLoaded`
+- `ESX.GetPlayerData`
+- `ESX.WaitForPlayerLoaded`
+- `ESX.GetItemLabel`
+- `ESX.SearchInventory`
+- `ESX.SetPlayerData`
+- `ESX.GetAccount`
+
+### Callback bridge
+
+- `ESX.TriggerServerCallback`
+
+### Spawn
+
+- `ESX.DisableSpawnManager`
+- `ESX.SpawnPlayer`
+- `Core.FreezePlayer`
+
+### Notification and UI
+
+- `ESX.ShowNotification`
+- `ESX.ShowAdvancedNotification`
+- `ESX.ShowHelpNotification`
+- `ESX.ShowFloatingHelpNotification`
+- `ESX.DrawMissionText`
+- `ESX.HashString`
+- `ESX.RegisterInput`
+- `ESX.UI.Menu.RegisterType`
+- `ESX.UI.Menu.Open`
+- `ESX.UI.Menu.Close`
+- `ESX.UI.Menu.CloseAll`
+- `ESX.UI.Menu.GetOpened`
+- `ESX.UI.Menu.GetOpenedMenus`
+- `ESX.UI.Menu.IsOpen`
+
+### Game helpers
+
+- `ESX.GetVehicleTypeClient`
+- `ESX.Game.SpawnObject`
+- `ESX.Game.SpawnLocalObject`
+- `ESX.Game.DeleteObject`
+- `ESX.Game.GetObjects`
+- `ESX.Game.GetClosestObject`
+- `ESX.Game.GetClosestEntity`
+- `ESX.Game.GetPeds`
+- `ESX.Game.GetPlayers`
+- `ESX.Game.GetPedMugshot`
+- `ESX.Game.GetClosestPed`
+- `ESX.Game.GetClosestPlayer`
+- `ESX.Game.GetPlayersInArea`
+- `ESX.Game.GetShapeTestResultSync`
+- `ESX.Game.RaycastScreen`
+- `ESX.Game.Teleport`
+- `ESX.Game.Utils.DrawText3D`
+- `ESX.Game.DeleteVehicle`
+- `ESX.Game.SpawnVehicle`
+- `ESX.Game.SpawnLocalVehicle`
+- `ESX.Game.IsVehicleEmpty`
+- `ESX.Game.GetVehicles`
+- `ESX.Game.GetClosestVehicle`
+- `ESX.Game.GetVehiclesInArea`
+- `ESX.Game.IsSpawnPointClear`
+- `ESX.Game.GetVehicleInDirection`
+- `ESX.Game.GetVehicleProperties`
+- `ESX.Game.SetVehicleProperties`
+
+### Scaleform and streaming
+
+- `ESX.Scaleform.ShowFreemodeMessage`
+- `ESX.Scaleform.ShowBreakingNews`
+- `ESX.Scaleform.ShowPopupWarning`
+- `ESX.Scaleform.ShowTrafficMovie`
+- `ESX.Scaleform.Utils.RequestScaleformMovie`
+- `ESX.Scaleform.Utils.RunMethod`
+- `ESX.Streaming.RequestModel`
+- `ESX.Streaming.RequestStreamedTextureDict`
+- `ESX.Streaming.RequestNamedPtfxAsset`
+- `ESX.Streaming.RequestAnimSet`
+- `ESX.Streaming.RequestAnimDict`
+- `ESX.Streaming.RequestWeaponAsset`
+
+## ExtendedPlayer methods
+
+### Accounts
+
+- `getAccounts`
+- `getAccount`
+- `setAccountMoney`
+- `addAccountMoney`
+- `removeAccountMoney`
+- `getMoney`
+- `setMoney`
+- `addMoney`
+- `removeMoney`
+
+### Inventory
+
+- `getInventory`
+- `getInventoryItem`
+- `addInventoryItem`
+- `removeInventoryItem`
+- `setInventoryItem`
+- `canCarryItem`
+- `hasItem`
+
+### Job
+
+- `getJob`
+- `setJob`
+
+### Loadout
+
+- `getLoadout`
+- `addWeapon`
+- `addWeaponComponent`
+- `addWeaponAmmo`
+- `updateWeaponAmmo`
+- `setWeaponTint`
+- `getWeaponTint`
+- `removeWeapon`
+- `removeWeaponComponent`
+- `removeWeaponAmmo`
+- `hasWeaponComponent`
+- `hasWeapon`
+- `getWeapon`
+
+### Metadata
+
+- `getMeta`
+- `setMeta`
+- `clearMeta`
+
+### Variables and identity
+
+- `isAdmin`
+- `getIdentifier`
+- `setGroup`
+- `getGroup`
+- `getName`
+- `setName`
+- `getSource`
+- `getPlayerId`
+- `set`
+- `get`
+
+### Utility
+
+- `triggerEvent`
+- `setCoords`
+- `getCoords`
+- `kick`
+- `executeCommand`
+
+## Config keys
+
+### `settings/public.lua`
+
+- `accounts`
+- `hybrid_data`
+- `starter`
+- `spawn_points`
+- `admin_groups`
+- `distance_give`
+- `debug_inventory_loadout`
+- `identifier`
+
+### `settings/locale.lua`
+
+- `locale`
+
+### `settings/ui.lua`
+
+- `offset`
+- `notification.default_limit`
+- `notification.default_timeout`
+
+### `settings/adjustments.lua`
+
+- `disable_health_regeneration`
+- `disable_vehicle_rewards`
+- `disable_npc_drops`
+- `disable_dispatch_services`
+- `disable_scenarios`
+- `disable_aim_assist`
+- `disable_vehicle_seat_shuffle`
+- `disable_display_ammo`
+- `enable_pvp`
+- `enable_wanted_level`
+- `basic_actions`
+- `remove_hud_components`
+- `multipliers`
+- `custom_ai_plate`
+
+### `settings/addons/optimize.lua`
+
+- `syncs.no_peds_sync`
+- `syncs.no_objects_sync`
+- `syncs.no_particles_sync`
+
+## Command reference
+
+Observed built-in commands:
+
+- `setcoords`
+- `tp`
+- `setjob`
+- `car`
+- `cardel`
+- `dv`
+- `fix`
+- `repair`
+- `setaccountmoney`
+- `giveaccountmoney`
+- `removeaccountmoney`
+- `giveitem`
+- `giveweapon`
+- `giveammo`
+- `giveweaponcomponent`
+- `clear`
+- `cls`
+- `clearall`
+- `clsall`
+- `refreshjobs`
+- `refreshitems`
+- `clearinventory`
+- `clearloadout`
+- `setgroup`
+- `save`
+- `saveall`
+- `group`
+- `job`
+- `info`
+- `coords`
+- `tpm`
+- `goto`
+- `bring`
+- `kill`
+- `freeze`
+- `unfreeze`
+- `noclip`
+- `players`
+- `setdim`
+- `setbucket`
+
+## Callback names
+
+- `esx:getPlayerData`
+- `esx:isUserAdmin`
+- `esx:getGameBuild`
+- `esx:getPlayerNames`
+- `esx:spawnVehicle`
+- `esx:getVehicleType`
+
+## Major event names
+
+- `esx:onPlayerJoined`
+- `esx:playerLoaded`
+- `esx:onPlayerSpawn`
+- `esx:onPlayerDeath`
+- `esx:playerDropped`
+- `esx:playerSaved`
+- `esx:setJob`
+- `esx:setGroup`
+- `esx:setAccountMoney`
+- `esx:onAddInventoryItem`
+- `esx:onRemoveInventoryItem`
+- `esx:jobsRefreshed`
+- `esx:registerSuggestions`
+- `esx:setInventory`
+- `esx:updatePlayerData`

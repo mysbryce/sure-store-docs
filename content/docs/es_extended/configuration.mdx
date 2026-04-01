@@ -1,0 +1,162 @@
+---
+title: Configuration
+description: Runtime configuration files for sure-es_extended and the behavior each key controls.
+---
+
+# Configuration
+
+All runtime configuration in this fork is loaded from `settings/`. This page summarizes each file and the keys that materially affect behavior.
+
+## `settings/public.lua`
+
+This is the main gameplay and framework behavior file.
+
+### `accounts`
+
+Defines the account types the framework recognizes and loads into the player object.
+
+Observed purpose:
+
+- establishes available named balances
+- shapes account initialization for players
+- supports money helpers such as `getMoney`, `addMoney`, and `removeMoney`
+
+### `hybrid_data`
+
+Controls hybrid player data behavior used across server persistence and client synchronization.
+
+Observed purpose:
+
+- influences how inventory and loadout data are represented
+- supports the server-rich versus client-safe data split
+
+### `starter`
+
+Defines initial player state for newly created characters.
+
+Observed areas include:
+
+- starter money and accounts
+- starter inventory and weapons, when configured
+- base character defaults used during first creation flow
+
+### `spawn_points`
+
+Defines the default spawn locations used when a player needs a framework-managed spawn position.
+
+### `admin_groups`
+
+Lists group names treated as administrative groups by the framework.
+
+Observed purpose:
+
+- used by admin checks
+- influences command permissions
+- affects ACE and group synchronization through player group changes
+
+### `distance_give`
+
+Defines the proximity rule used when players give items to each other.
+
+### `debug_inventory_loadout`
+
+Debug-oriented key used to control additional visibility around inventory and loadout state.
+
+### `identifier`
+
+Defines identifier strategy for player lookup and persistence.
+
+This key is especially important because lookup helpers and save or load logic depend on stable identifier extraction.
+
+## `settings/locale.lua`
+
+### `locale`
+
+Defines the locale selection used by the framework for translated strings.
+
+## `settings/ui.lua`
+
+This file controls parts of the NUI and UI helper behavior.
+
+### `offset`
+
+Used by the notification UI to determine edge spacing for portal-mounted components.
+
+### `notification.default_limit`
+
+Controls the default number of notifications visible at once.
+
+### `notification.default_timeout`
+
+Controls the default notification duration when an explicit duration is not supplied.
+
+## `settings/adjustments.lua`
+
+This file contains gameplay adjustment flags and client behavior toggles.
+
+### Toggle keys
+
+- `disable_health_regeneration`
+- `disable_vehicle_rewards`
+- `disable_npc_drops`
+- `disable_dispatch_services`
+- `disable_scenarios`
+- `disable_aim_assist`
+- `disable_vehicle_seat_shuffle`
+- `disable_display_ammo`
+- `enable_pvp`
+- `enable_wanted_level`
+- `basic_actions`
+
+These settings are used by client adjustment logic to turn native behavior on or off.
+
+### `remove_hud_components`
+
+Defines HUD components removed or suppressed by client runtime behavior.
+
+### `multipliers`
+
+Used for gameplay multiplier tuning where the client applies configurable values to native behavior.
+
+### `custom_ai_plate`
+
+Controls custom plate behavior related to AI vehicles.
+
+## `settings/weapons.lua`
+
+Defines weapon metadata used by shared and gameplay helpers.
+
+Observed purpose:
+
+- labels
+- components
+- tint support
+- weapon lookup tables used by helpers such as `ESX.GetWeapon` and `ESX.GetWeaponList`
+
+## `settings/weapon-tints.lua`
+
+Defines tint metadata used when a weapon supports tint application.
+
+This file is consulted when the player loadout methods validate tint changes.
+
+## `settings/addons/optimize.lua`
+
+Provides optimization-related sync flags.
+
+### `syncs.no_peds_sync`
+
+Controls ped sync optimization behavior.
+
+### `syncs.no_objects_sync`
+
+Controls object sync optimization behavior.
+
+### `syncs.no_particles_sync`
+
+Controls particle sync optimization behavior.
+
+## Configuration guidance
+
+Before changing behavior in production, treat `settings/public.lua` and `settings/adjustments.lua` as the highest-impact files. They shape player identity handling, admin access, starter state, spawn behavior, and several client-facing gameplay rules.
+
+When changing UI-related values, also verify the NUI behavior described in [NUI](./nui).

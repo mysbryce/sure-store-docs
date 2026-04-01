@@ -1,0 +1,164 @@
+---
+title: Getting Started
+description: Install, start, and verify sure-es_extended from the current resource structure.
+---
+
+# Getting Started
+
+This page covers the current bootstrap and first-run expectations observed in the `sure-es_extended` resource.
+
+<Callout>
+  If you are wiring this resource into a fresh server, focus on dependency order, the settings review, and the database check first. Those three areas shape most early startup issues.
+</Callout>
+
+## Dependencies
+
+<Tabs items={['Direct dependencies', 'Runtime expectations']}>
+  <Tab>
+    <ul>
+      <li><code>oxmysql</code></li>
+      <li><code>ox_lib</code></li>
+    </ul>
+  </Tab>
+  <Tab>
+    <ul>
+      <li>state bags</li>
+      <li>OneSync-related entity helpers</li>
+      <li>server callbacks routed through <code>ox_lib</code></li>
+      <li>NUI for the notification application</li>
+    </ul>
+  </Tab>
+</Tabs>
+
+## Resource entrypoints
+
+### Shared
+
+- `shared/main.lua`
+- `shared/imports.lua`
+- `imports.lua`
+
+### Client
+
+- `client/main.lua`
+- all client modules loaded from `client/functions.lua`, `client/modules/`, and `client/classes/`
+
+### Server
+
+- `server/main.lua`
+- `server/common.lua`
+- `server/classes/player/init.lua`
+- method files under `server/classes/player/methods/`
+- supporting modules under `server/functions.lua`, `server/modules/`, and `server/classes/`
+
+### UI
+
+- `ui_page 'nui/dist/index.html'`
+
+The built NUI output in `nui/dist/` is what the game loads at runtime.
+
+## Startup behavior
+
+At startup, the server boot flow performs a predictable sequence:
+
+<Steps>
+
+### Load configuration
+
+The framework reads its runtime behavior from `settings/` before the main services come online.
+
+### Build the shared object
+
+The shared `ESX` object is created and extended by shared, server, and client bootstrap code.
+
+### Prepare persistence and caches
+
+Database-related state is initialized, then jobs and items are loaded into runtime memory.
+
+### Register services
+
+Callbacks, commands, and compatibility helpers are registered so other resources can safely interact with the framework.
+
+### Accept player joins
+
+Once the runtime is prepared, the resource can start loading player records and constructing `ExtendedPlayer` instances.
+
+</Steps>
+
+On the client side, startup loads ESX modules, waits for player state to become available, and wires UI, callback, spawn, and gameplay helpers.
+
+## Recommended start order
+
+<Steps>
+
+### Start `oxmysql`
+
+Persistence must be available before the framework tries to read or write player state.
+
+### Start `ox_lib`
+
+Callback routing and other shared utilities depend on it.
+
+### Start `es_extended`
+
+This resource should come online before anything that expects the shared ESX object.
+
+### Start dependent resources
+
+Gameplay and integration resources that rely on ESX helpers or lifecycle events should load afterward.
+
+</Steps>
+
+## First configuration review
+
+Before running this fork in a real server environment, review:
+
+- `settings/public.lua`
+- `settings/locale.lua`
+- `settings/ui.lua`
+- `settings/adjustments.lua`
+- `settings/weapons.lua`
+- `settings/weapon-tints.lua`
+- `settings/addons/optimize.lua`
+
+The [Configuration](./configuration) page explains each file in detail.
+
+## Database bootstrap note
+
+<Callout title="Database note">
+  The codebase includes both SQL assets and runtime schema creation logic. One important implementation detail is that startup code references a `users_test` table in bootstrap checks, while persistence and the provided SQL file are centered around `users`.
+</Callout>
+
+Treat this as an observed implementation detail that you verify in your environment before production rollout.
+
+See [Database](./database) for the full persistence discussion.
+
+## Compatibility import surface
+
+The fork still exposes the shared object export expected by older integrations:
+
+```lua
+ESX = exports['es_extended']:getSharedObject()
+```
+
+That export is defined in `shared/main.lua`.
+
+For player access, this fork also keeps compatibility helpers through `imports.lua`, documented in [Architecture](./architecture) and [Server API](./server-api).
+
+## Verification checklist
+
+<Accordions type="single" collapsible>
+  <Accordion title="Framework startup">
+    Verify that the resource starts without missing dependency errors and that both jobs and items are loaded into server memory.
+  </Accordion>
+  <Accordion title="Player load flow">
+    Verify that players can connect, reach the loaded state, and receive `esx:playerLoaded` correctly.
+  </Accordion>
+  <Accordion title="UI and persistence">
+    Verify that the notification NUI mounts without browser-side errors and that persistence writes succeed through `oxmysql`.
+  </Accordion>
+</Accordions>
+
+## Support path
+
+This docs site is now the primary written reference for the fork. For operational troubleshooting, pair it with direct inspection of the resource logs and the live database schema in your server environment.

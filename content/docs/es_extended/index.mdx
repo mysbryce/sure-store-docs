@@ -1,0 +1,69 @@
+---
+title: sure-es_extended
+description: Source-based documentation for the Sure fork of es_extended, covering bootstrap, APIs, persistence, lifecycle flow, and current runtime behavior.
+---
+
+# sure-es_extended
+
+This documentation set is written from the current `sure-es_extended` codebase and is intended to be the working reference for this fork.
+
+<Callout>
+  These docs describe the behavior that exists in the current Sure fork. When this resource differs from common upstream ESX expectations, this implementation is the source of truth.
+</Callout>
+
+## Resource identity
+
+<Tabs items={['Identity', 'Role', 'Coverage']}>
+  <Tab>
+    <ul>
+      <li>Resource: <code>es_extended</code></li>
+      <li>Manifest: <code>fxmanifest.lua</code></li>
+      <li>Lua runtime: <code>lua54 "yes"</code></li>
+      <li>Version: <code>2.10.2</code></li>
+      <li>Author string: <code>ESX | Dogeaterx (Sure)</code></li>
+    </ul>
+  </Tab>
+  <Tab>
+    <p><code>sure-es_extended</code> is the core framework resource for the Sure server stack. It initializes the shared <code>ESX</code> object, loads framework configuration, manages connected players, persists character state, exposes compatibility helpers, and provides the server and client APIs that other resources build on top of.</p>
+  </Tab>
+  <Tab>
+    <p>The current documentation covers bootstrap, architecture, configuration, persistence, player lifecycle, server APIs, client APIs, events, callbacks, NUI behavior, and the exact-name reference surface.</p>
+  </Tab>
+</Tabs>
+
+## What this fork provides
+
+<Cards>
+  <Card title="Shared Layer" href="./architecture">
+    Common helpers, config access, weapon helpers, and the shared object export used by dependent resources.
+  </Card>
+  <Card title="Server Runtime" href="./server-api">
+    Player loading, persistence, items, jobs, callbacks, commands, and compatibility services.
+  </Card>
+  <Card title="Client Runtime" href="./client-api">
+    Player data sync, UI helpers, spawn flow, streaming helpers, and gameplay utilities.
+  </Card>
+  <Card title="NUI Layer" href="./nui">
+    Notification-focused React UI with a narrow browser bridge instead of a full HUD shell.
+  </Card>
+</Cards>
+
+## Documentation map
+
+<Cards>
+  <Card title="Getting Started" href="./getting-started">Install order, dependencies, startup flow, and the first environment checks.</Card>
+  <Card title="Architecture" href="./architecture">Folder layout, core globals, compatibility wrappers, and the player model.</Card>
+  <Card title="Configuration" href="./configuration">A practical read-through of the files in <code>settings/</code> and what they control.</Card>
+  <Card title="Database" href="./database">SQL assets, persistence behavior, save timing, and schema notes.</Card>
+  <Card title="Player Lifecycle" href="./player-lifecycle">How players move from join to load, sync, spawn, save, and drop.</Card>
+  <Card title="Server API" href="./server-api">Exports, callbacks, commands, item and job services, and OneSync helpers.</Card>
+  <Card title="Client API" href="./client-api">Client-side ESX helpers, UI services, spawn utilities, and game helpers.</Card>
+  <Card title="Events and Callbacks" href="./events-and-callbacks">Observed net events, local events, callback names, and payload notes.</Card>
+  <Card title="ExtendedPlayer" href="./extended-player">Detailed method and property reference for the server-side player object.</Card>
+  <Card title="NUI" href="./nui">Notification UI structure, events, payloads, and browser bridge details.</Card>
+  <Card title="Reference" href="./reference">Compact exact-name lookup for APIs, events, commands, and config keys.</Card>
+</Cards>
+
+## Scope
+
+The goal is to make the docs useful for both daily integration work and internal maintenance. Where the code is permissive or lightly typed, descriptions are written as observed implementation details rather than as guessed contracts.

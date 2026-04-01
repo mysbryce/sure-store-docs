@@ -1,0 +1,100 @@
+---
+title: NUI
+description: Notification-focused React UI architecture and event bridge used by sure-es_extended.
+---
+
+# NUI
+
+## Purpose
+
+The current NUI implementation is focused on:
+
+- queue-based notifications
+- a debug JSON tree view
+- screen-positioned portal containers
+
+It is not a full inventory, menu, or HUD replacement UI.
+
+## Entrypoints
+
+- HTML entry: `nui/index.html`
+- built output: `nui/dist/`
+- React root: `nui/src/App.tsx`
+
+## Main React components
+
+### `App.tsx`
+
+Owns:
+
+- debug JSON tree visibility
+- placement containers
+- NUI `ready` fetch to read UI offset
+- Escape handling that sends `close`
+- mounting the notification component
+
+### `components/Notification/index.tsx`
+
+Owns:
+
+- default limit and timeout state
+- event subscriptions
+- queue handling
+- animated rendering
+- placement output through `Portal`
+
+## Browser-to-game callbacks
+
+Observed `fetchNui` usage:
+
+- `ready`
+- `notification/ready`
+- `close`
+
+## Game-to-browser events
+
+Observed event listeners:
+
+- `toggle`
+- `update`
+- `notification/setDefaults`
+- `notification/add`
+
+## Notification payload shape
+
+Observed notification entries contain:
+
+- `id`
+- `type`
+- `text`
+- optional `duration`
+
+Observed defaults payload contains:
+
+- `defaultLimit`
+- `defaultTimeout`
+
+## Placement model
+
+The app renders portal targets for:
+
+- `top-start`
+- `top-center`
+- `top-end`
+- `center-start`
+- `center-center`
+- `center-end`
+- `bottom-start`
+- `bottom-center`
+- `bottom-end`
+
+The notification component is currently mounted at:
+
+- `Placement.CENTER_END`
+
+## Important implementation notes
+
+- in development, `fetchNui` can return mock data when provided
+- in production, `fetchNui` targets `https://${GetParentResourceName()}/${eventName}`
+- `UI.offset` from `settings/ui.lua` controls edge padding
+- notification queue behavior depends on the defaults returned by the Lua side
